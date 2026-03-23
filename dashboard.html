@@ -128,18 +128,48 @@
     <div class="dashboard-grid">
         <div class="card">
             <div class="card-title">Current Streak</div>
-            <div class="card-value warning">0</div>
+            <div class="card-value warning" id="streak">0</div>
         </div>
         
         <div class="card">
             <div class="card-title">Total Days Tracked</div>
-            <div class="card-value primary">0</div>
+            <div class="card-value primary" id="totalDays">0</div>
         </div>
         
         <div class="card">
             <div class="card-title">Consistency</div>
-            <div class="card-value success">0%</div>
+            <div class="card-value success" id="consistency">0%</div>
         </div>
     </div>
+
+    <script>
+        function updateStats() {
+            const logs = JSON.parse(localStorage.getItem('logs')) || [];
+            
+            const totalDays = logs.length;
+            const studiedDays = logs.filter(log => log.studied).length;
+            
+            let consistency = 0;
+            if (totalDays > 0) {
+                consistency = Math.round((studiedDays / totalDays) * 100);
+            }
+            
+            let currentStreak = 0;
+            for (let i = logs.length - 1; i >= 0; i--) {
+                if (logs[i].studied) {
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+            
+            document.getElementById('totalDays').innerText = totalDays;
+            document.getElementById('consistency').innerText = consistency + '%';
+            document.getElementById('streak').innerText = currentStreak;
+        }
+        
+        // Run on load
+        updateStats();
+    </script>
 </body>
 </html>

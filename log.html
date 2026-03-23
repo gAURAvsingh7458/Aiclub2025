@@ -124,7 +124,7 @@
 <body>
     <div class="container">
         <h1>Log Today</h1>
-        <form onsubmit="event.preventDefault(); window.location.href='dashboard.html';">
+        <form id="logForm">
             <div class="form-group checkbox-group">
                 <input type="checkbox" id="studied" name="studied">
                 <label for="studied">Did you study today?</label>
@@ -143,5 +143,28 @@
             <button type="submit">Save Log</button>
         </form>
     </div>
+    <script>
+        document.getElementById('logForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const studied = document.getElementById('studied').checked;
+            const activity = document.getElementById('activity').value;
+            const time = parseFloat(document.getElementById('time').value);
+            const date = new Date().toISOString().split('T')[0];
+            
+            const newLog = {
+                date: date,
+                studied: studied,
+                task: activity,
+                hours: time
+            };
+            
+            let logs = JSON.parse(localStorage.getItem('logs')) || [];
+            logs.push(newLog);
+            localStorage.setItem('logs', JSON.stringify(logs));
+            
+            window.location.href = 'dashboard.html';
+        });
+    </script>
 </body>
 </html>

@@ -145,10 +145,16 @@
     <div class="card premium-card" style="width: calc(100% - 4rem); max-width: 736px; margin-bottom: 2rem; align-items: flex-start; text-align: left;">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 0.5rem;">
             <h2 style="font-size: 1.5rem; margin: 0; color: #ffffff;">Premium Insights</h2>
-            <button id="premiumBtn" style="display: none; padding: 10px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; border-radius: 8px; background-color: #f59e0b; color: white; transition: background-color 0.2s, transform 0.1s;" onmouseover="this.style.backgroundColor='#d97706'; this.style.transform='translateY(-2px)';" onmouseout="this.style.backgroundColor='#f59e0b'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onclick="localStorage.setItem('isPremium', 'true'); window.location.reload();">Upgrade to Premium (₹10)</button>
+            <button id="premiumBtn" style="display: none; padding: 10px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; border-radius: 8px; background-color: #f59e0b; color: white; transition: background-color 0.2s, transform 0.1s;" onmouseover="this.style.backgroundColor='#d97706'; this.style.transform='translateY(-2px)';" onmouseout="this.style.backgroundColor='#f59e0b'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onclick="showPayment()">Upgrade to Premium (₹10)</button>
         </div>
         <div id="insights-content" style="color: #a0a0a0; font-size: 1.05rem; line-height: 1.5;">
             Loading...
+        </div>
+        
+        <div id="payment-section" style="display: none; margin-top: 1.5rem; width: 100%; padding: 1.5rem; background-color: #2d2d2d; border-radius: 8px; border: 1px solid #3d3d3d; box-sizing: border-box;">
+            <p style="margin-top: 0; margin-bottom: 1rem; color: #ffffff; font-size: 1.1rem;">Pay ₹10 via UPI: <strong>9582177468@ptyes</strong></p>
+            <p style="margin-top: 0; margin-bottom: 1.5rem; color: #a0a0a0; font-size: 0.95rem;">After payment, click 'I have paid'</p>
+            <button class="log-btn" style="width: 100%; background-color: #10b981;" onmouseover="this.style.backgroundColor='#059669';" onmouseout="this.style.backgroundColor='#10b981';" onclick="localStorage.setItem('isPremium', 'true'); window.location.reload();">I have paid</button>
         </div>
     </div>
 
@@ -180,6 +186,11 @@
             document.getElementById('streak').innerText = currentStreak + ' days';
         }
         
+        function showPayment() {
+            document.getElementById('payment-section').style.display = 'block';
+            document.getElementById('premiumBtn').style.display = 'none';
+        }
+
         function updatePremiumInsights() {
             const isPremium = localStorage.getItem('isPremium') === 'true';
             const insightsContainer = document.getElementById('insights-content');

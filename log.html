@@ -3,168 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Today</title>
+    <title>PathPilot – Log Today</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            background-color: #121212;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 2rem;
         }
-
         .container {
-            background-color: #1e1e1e;
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            border-radius: 16px;
             padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
+            max-width: 460px;
         }
-
-        h1 {
-            margin-top: 0;
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .checkbox-group {
-            flex-direction: row;
+        .back-link {
+            display: inline-flex;
             align-items: center;
-            background-color: #2d2d2d;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #3d3d3d;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #555;
+            text-decoration: none;
             margin-bottom: 1.5rem;
-            transition: border-color 0.2s ease;
-        }
-
-        .checkbox-group:focus-within, .checkbox-group:hover {
-            border-color: #3b82f6;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 1rem;
             cursor: pointer;
-            accent-color: #3b82f6;
+            transition: color 0.2s;
         }
-
-        .checkbox-group label {
-            margin-bottom: 0;
-            cursor: pointer;
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        label {
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-            color: #b3b3b3;
-        }
-
-        input[type="text"], input[type="number"] {
+        .back-link:hover { color: #888; }
+        h2 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .date-label { font-size: 0.85rem; color: #555; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 0.4rem; }
+        input, select, textarea {
             width: 100%;
-            padding: 12px;
-            background-color: #2d2d2d;
-            border: 1px solid #3d3d3d;
+            padding: 12px 14px;
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
             border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
         }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; }
+        textarea { resize: none; min-height: 80px; }
+        option { background: #1e1e1e; }
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 1.25rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
-
-        button {
+        .toggle-row:hover { border-color: #3b82f6; }
+        .toggle-label { font-size: 0.95rem; color: #fff; }
+        .toggle {
+            width: 44px; height: 24px;
+            background: #2d2d2d;
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .toggle.on { background: #3b82f6; }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: left 0.2s;
+        }
+        .toggle.on::after { left: 23px; }
+        .mood-grid { display: flex; gap: 0.5rem; }
+        .mood-btn {
+            flex: 1;
+            padding: 10px 6px;
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            color: #888;
+            font-size: 0.82rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .mood-btn:hover { border-color: #555; color: #fff; }
+        .mood-btn.selected { border-color: #3b82f6; background: rgba(59,130,246,0.12); color: #fff; }
+        .mood-btn .emoji { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+        .hours-row { display: flex; align-items: center; gap: 1rem; }
+        .hours-row input[type=range] { flex: 1; accent-color: #3b82f6; }
+        .hours-val { font-size: 1.1rem; font-weight: 700; color: #3b82f6; min-width: 40px; text-align: right; }
+        .btn-submit {
             width: 100%;
             padding: 14px;
-            margin-top: 1rem;
-            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            font-size: 1rem;
             font-weight: 600;
-            background-color: #3b82f6;
-            color: white;
+            background: #3b82f6;
+            color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: background 0.2s, transform 0.1s;
         }
-
-        button:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        .btn-submit:hover { background: #2563eb; transform: translateY(-1px); }
+        .current-decision-box {
+            background: rgba(59,130,246,0.07);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.84rem;
+            color: #888;
         }
-
-        button:active {
-            transform: translateY(0);
-        }
+        .current-decision-box strong { color: #3b82f6; }
+        .divider { border: none; border-top: 1px solid #1e1e1e; margin: 1.5rem 0; }
+        .section-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; color: #555; text-transform: uppercase; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Log Today</h1>
-        <form id="logForm">
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="studied" name="studied">
-                <label for="studied">Did you study today?</label>
-            </div>
-            
-            <div class="form-group">
-                <label for="activity">What did you do?</label>
-                <input type="text" id="activity" name="activity" placeholder="e.g. Practiced Array problems" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="time">Time spent (hours)</label>
-                <input type="number" id="time" name="time" min="0" step="0.5" placeholder="0" required>
-            </div>
-            
-            <button type="submit">Save Log</button>
-        </form>
+<div class="container">
+    <a class="back-link" onclick="window.location.href='dashboard.html'">← Dashboard</a>
+    <h2>Log Today</h2>
+    <p class="date-label" id="today-date"></p>
+
+    <div class="current-decision-box" id="decision-box">
+        Currently tracking: <strong id="current-focus">Loading...</strong>
     </div>
-    <script>
-        document.getElementById('logForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const studied = document.getElementById('studied').checked;
-            const activity = document.getElementById('activity').value;
-            const time = parseFloat(document.getElementById('time').value);
-            const date = new Date().toISOString().split('T')[0];
-            
-            const newLog = {
-                date: date,
-                studied: studied,
-                task: activity,
-                hours: time
-            };
-            
-            let logs = JSON.parse(localStorage.getItem('logs')) || [];
-            logs.push(newLog);
-            localStorage.setItem('logs', JSON.stringify(logs));
-            
-            window.location.href = 'dashboard.html';
-        });
-    </script>
+
+    <div class="section-title">Daily Check-in</div>
+
+    <div class="toggle-row" onclick="toggleStudied()">
+        <span class="toggle-label">Did you study today?</span>
+        <div class="toggle" id="studiedToggle"></div>
+    </div>
+
+    <div class="form-group">
+        <label>What did you work on?</label>
+        <input type="text" id="activity" placeholder="e.g. Practiced binary search problems" />
+    </div>
+
+    <div class="form-group">
+        <label>Hours spent: <span id="hoursVal" style="color:#3b82f6;font-weight:600;">1.5</span>h</label>
+        <input type="range" min="0" max="12" step="0.5" value="1.5" id="hoursRange" oninput="document.getElementById('hoursVal').textContent=this.value">
+    </div>
+
+    <div class="form-group">
+        <label>How do you feel about your progress?</label>
+        <div class="mood-grid">
+            <div class="mood-btn" onclick="selectMood('stuck',this)"><span class="emoji">😤</span>Stuck</div>
+            <div class="mood-btn" onclick="selectMood('okay',this)"><span class="emoji">😐</span>Okay</div>
+            <div class="mood-btn" onclick="selectMood('good',this)"><span class="emoji">😊</span>Good</div>
+            <div class="mood-btn" onclick="selectMood('great',this)"><span class="emoji">🔥</span>Great</div>
+        </div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-title">Weekly Reflection (optional)</div>
+
+    <div class="form-group">
+        <label>Any doubts about your current focus?</label>
+        <textarea id="doubts" placeholder="e.g. Wondering if I should switch to Web Dev..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Regret score for your current path (1–10): <span id="regretVal" style="color:#f59e0b;font-weight:600;">5</span></label>
+        <input type="range" min="1" max="10" step="1" value="5" id="regretRange" oninput="document.getElementById('regretVal').textContent=this.value">
+    </div>
+
+    <button class="btn-submit" onclick="saveLog()">Save Log →</button>
+</div>
+
+<script>
+    let studied = false;
+    let mood = '';
+
+    const user = JSON.parse(localStorage.getItem('pathpilot_user') || '{}');
+    const focusLabels = { dsa:'DSA', webdev:'Web Dev', ai:'AI/ML', other:'Other' };
+
+    document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('current-focus').textContent = focusLabels[user.focus] || 'Not set';
+
+    function toggleStudied() {
+        studied = !studied;
+        const t = document.getElementById('studiedToggle');
+        t.classList.toggle('on', studied);
+    }
+
+    function selectMood(m, el) {
+        mood = m;
+        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function saveLog() {
+        const activity = document.getElementById('activity').value.trim();
+        if (!activity) { alert('Please enter what you worked on'); return; }
+
+        const log = {
+            date: new Date().toISOString().split('T')[0],
+            studied,
+            task: activity,
+            hours: parseFloat(document.getElementById('hoursRange').value),
+            mood,
+            doubts: document.getElementById('doubts').value.trim(),
+            regret: parseInt(document.getElementById('regretRange').value),
+            focus: user.focus || 'unknown'
+        };
+
+        const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+
+        // prevent duplicate for same day
+        const todayStr = log.date;
+        const existingIdx = logs.findIndex(l => l.date === todayStr);
+        if (existingIdx >= 0) {
+            logs[existingIdx] = log;
+        } else {
+            logs.push(log);
+        }
+
+        localStorage.setItem('logs', JSON.stringify(logs));
+        window.location.href = 'dashboard.html';
+    }
+</script>
 </body>
 </html>

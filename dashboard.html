@@ -3,213 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>PathPilot – Dashboard</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
-            background-color: #121212;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-
-        .header {
-            width: 100%;
-            max-width: 800px;
-            padding: 2rem;
-            box-sizing: border-box;
+        .topbar {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2d2d2d;
-            margin-bottom: 2rem;
-            margin-top: 2rem;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid #1a1a1a;
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(8px);
+            z-index: 10;
         }
-
-        h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            font-weight: 600;
-        }
-
-        .log-btn {
-            padding: 12px 24px;
-            background-color: #3b82f6;
-            color: white;
+        .topbar-logo { font-size: 1rem; font-weight: 700; color: #3b82f6; letter-spacing: 0.05em; }
+        .topbar-greeting { font-size: 0.85rem; color: #555; }
+        .btn-log {
+            padding: 9px 20px;
+            background: #3b82f6;
+            color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: background 0.2s, transform 0.1s;
         }
-
-        .log-btn:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .log-btn:active {
-            transform: translateY(0);
-        }
-
-        .dashboard-grid {
-            width: 100%;
-            max-width: 800px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            padding: 0 2rem 2rem 2rem;
-            box-sizing: border-box;
-        }
-
-        .card {
-            background-color: #1e1e1e;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border: 1px solid #2d2d2d;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            border-color: #3b82f6;
-        }
-
-        .card-title {
-            font-size: 0.95rem;
-            color: #a0a0a0;
-            margin-bottom: 1rem;
+        .btn-log:hover { background: #2563eb; transform: translateY(-1px); }
+        .page { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .section { margin-bottom: 2.5rem; }
+        .section-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #444;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 500;
+            margin-bottom: 1rem;
         }
-
-        .card-value {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0;
-            line-height: 1;
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+        .stat-card {
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
         }
-        
-        .card-value.primary {
-            color: #3b82f6;
+        .stat-label { font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-value.blue { color: #3b82f6; }
+        .stat-value.green { color: #10b981; }
+        .stat-value.amber { color: #f59e0b; }
+        .stat-value.purple { color: #8b5cf6; }
+        .decision-card {
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            padding: 1.5rem;
         }
-        
-        .card-value.success {
-            color: #10b981;
+        .decision-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .decision-focus { font-size: 1.2rem; font-weight: 600; }
+        .decision-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
         }
-        
-        .card-value.warning {
-            color: #f59e0b;
+        .badge-dsa { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .badge-webdev { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-ai { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .badge-other { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+        .decision-meta { font-size: 0.82rem; color: #555; margin-bottom: 1rem; }
+        .progress-bar-bg { background: #2d2d2d; border-radius: 4px; height: 6px; margin-bottom: 0.4rem; }
+        .progress-bar-fill { height: 6px; border-radius: 4px; transition: width 0.8s ease; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: #555; }
+        .insight-cards { display: flex; flex-direction: column; gap: 0.75rem; }
+        .insight-card {
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
         }
+        .insight-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .insight-text { font-size: 0.88rem; color: #ccc; line-height: 1.6; }
+        .insight-text strong { color: #fff; }
+        .insight-card.warning { border-color: rgba(245,158,11,0.3); }
+        .insight-card.success { border-color: rgba(16,185,129,0.3); }
+        .insight-card.info { border-color: rgba(59,130,246,0.3); }
+        .log-history { display: flex; flex-direction: column; gap: 0.6rem; }
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1.1rem;
+            background: #141414;
+            border: 1px solid #1e1e1e;
+            border-radius: 10px;
+        }
+        .log-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .log-dot.studied { background: #10b981; }
+        .log-dot.skipped { background: #2d2d2d; }
+        .log-date { font-size: 0.8rem; color: #555; min-width: 80px; }
+        .log-task { font-size: 0.85rem; color: #ccc; flex: 1; }
+        .log-hours { font-size: 0.8rem; color: #3b82f6; font-weight: 600; }
+        .log-mood { font-size: 0.9rem; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: #444; }
+        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+        .heat-grid { display: flex; gap: 4px; flex-wrap: wrap; }
+        .heat-cell {
+            width: 14px; height: 14px;
+            border-radius: 3px;
+            background: #1e1e1e;
+            transition: background 0.2s;
+        }
+        .heat-cell.l1 { background: rgba(59,130,246,0.2); }
+        .heat-cell.l2 { background: rgba(59,130,246,0.5); }
+        .heat-cell.l3 { background: #3b82f6; }
+        .pattern-text { font-size: 0.88rem; color: #ccc; line-height: 1.7; margin-bottom: 0.5rem; }
+        .pattern-text strong { color: #f59e0b; }
+        .week-bar { display: flex; gap: 6px; align-items: flex-end; height: 60px; margin-bottom: 0.4rem; }
+        .w-bar { flex: 1; background: #1e1e1e; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 4px; }
+        .w-bar.active { background: #3b82f6; }
+        .w-labels { display: flex; gap: 6px; }
+        .w-label { flex: 1; text-align: center; font-size: 0.7rem; color: #444; }
+        .no-data-msg { font-size: 0.85rem; color: #444; padding: 1rem 0; }
+        .peer-comparison { background: #141414; border: 1px solid #2d2d2d; border-radius: 12px; padding: 1.25rem; }
+        .peer-row { margin-bottom: 0.75rem; }
+        .peer-row-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; }
+        .peer-row-label span:first-child { color: #888; }
+        .peer-row-label span:last-child { font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Dashboard</h1>
-        <button class="log-btn" onclick="window.location.href='log.html'">Log Today</button>
+
+<div class="topbar">
+    <div class="topbar-logo">PathPilot</div>
+    <div class="topbar-greeting" id="greeting">Welcome back</div>
+    <button class="btn-log" onclick="window.location.href='log.html'">+ Log Today</button>
+</div>
+
+<div class="page">
+
+    <!-- Stats -->
+    <div class="section">
+        <div class="section-title">Your progress</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Current Streak</div>
+                <div class="stat-value amber" id="streak">0</div>
+                <div style="font-size:0.75rem;color:#555;margin-top:4px;">days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Logged</div>
+                <div class="stat-value blue" id="totalDays">0</div>
+                <div style="font-size:0.75rem;color:#555;margin-top:4px;">days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Consistency</div>
+                <div class="stat-value green" id="consistency">0%</div>
+                <div style="font-size:0.75rem;color:#555;margin-top:4px;">studied days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Hours/Day</div>
+                <div class="stat-value purple" id="avgHours">0h</div>
+                <div style="font-size:0.75rem;color:#555;margin-top:4px;">when studied</div>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="card">
-            <div class="card-title">Current Streak</div>
-            <div class="card-value warning" id="streak">0</div>
-        </div>
-        
-        <div class="card">
-            <div class="card-title">Total Days Tracked</div>
-            <div class="card-value primary" id="totalDays">0</div>
-        </div>
-        
-        <div class="card">
-            <div class="card-title">Consistency</div>
-            <div class="card-value success" id="consistency">0%</div>
-        </div>
-    </div>
-    
-    <div class="card premium-card" style="width: calc(100% - 4rem); max-width: 736px; margin-bottom: 2rem; align-items: flex-start; text-align: left;">
-        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 0.5rem;">
-            <h2 style="font-size: 1.5rem; margin: 0; color: #ffffff;">Premium Insights</h2>
-            <button id="premiumBtn" style="display: none; padding: 10px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; border-radius: 8px; background-color: #f59e0b; color: white; transition: background-color 0.2s, transform 0.1s;" onmouseover="this.style.backgroundColor='#d97706'; this.style.transform='translateY(-2px)';" onmouseout="this.style.backgroundColor='#f59e0b'; this.style.transform='translateY(0)';" onmousedown="this.style.transform='translateY(0)';" onclick="showPayment()">Upgrade to Premium (₹10)</button>
-        </div>
-        <div id="insights-content" style="color: #a0a0a0; font-size: 1.05rem; line-height: 1.5;">
-            Loading...
-        </div>
-        
-        <div id="payment-section" style="display: none; margin-top: 1.5rem; width: 100%; padding: 1.5rem; background-color: #2d2d2d; border-radius: 8px; border: 1px solid #3d3d3d; box-sizing: border-box;">
-            <p style="margin-top: 0; margin-bottom: 1rem; color: #ffffff; font-size: 1.1rem;">Pay ₹10 via UPI: <strong>9582177468@ptyes</strong></p>
-            <p style="margin-top: 0; margin-bottom: 1.5rem; color: #a0a0a0; font-size: 0.95rem;">After payment, click 'I have paid'</p>
-            <button class="log-btn" style="width: 100%; background-color: #10b981;" onmouseover="this.style.backgroundColor='#059669';" onmouseout="this.style.backgroundColor='#10b981';" onclick="localStorage.setItem('isPremium', 'true'); window.location.reload();">I have paid</button>
+    <!-- Current Decision -->
+    <div class="section">
+        <div class="section-title">Current decision</div>
+        <div class="decision-card">
+            <div class="decision-header">
+                <div>
+                    <div class="decision-focus" id="decision-focus">—</div>
+                    <div class="decision-meta" id="decision-meta">Started —</div>
+                </div>
+                <span class="decision-badge" id="decision-badge">—</span>
+            </div>
+            <div class="progress-label" style="margin-bottom:4px;">
+                <span style="font-size:0.78rem;color:#555">8-week commitment progress</span>
+                <span style="font-size:0.78rem;color:#3b82f6;font-weight:600" id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar" style="background:#3b82f6;width:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#444;margin-top:4px;">
+                <span>Week 1</span><span>Week 8</span>
+            </div>
         </div>
     </div>
 
-    <script>
-        function updateStats() {
-            const logs = JSON.parse(localStorage.getItem('logs')) || [];
-            
-            const totalDays = logs.length;
-            const studiedDays = logs.filter(log => log.studied).length;
-            
-            let consistency = 0;
-            if (totalDays > 0) {
-                consistency = Math.round((studiedDays / totalDays) * 100);
-            }
-            
-            const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            let currentStreak = 0;
-            for (let i = 0; i < sortedLogs.length; i++) {
-                if (sortedLogs[i].studied) {
-                    currentStreak++;
-                } else {
-                    break;
-                }
-            }
-            
-            document.getElementById('totalDays').innerText = totalDays;
-            document.getElementById('consistency').innerText = consistency + '%';
-            document.getElementById('streak').innerText = currentStreak + ' days';
+    <!-- Activity Heatmap -->
+    <div class="section">
+        <div class="section-title">Activity — last 30 days</div>
+        <div class="heat-grid" id="heat-grid"></div>
+    </div>
+
+    <!-- Weekly Hours Chart -->
+    <div class="section">
+        <div class="section-title">Hours this week</div>
+        <div class="week-bar" id="week-bar"></div>
+        <div class="w-labels" id="week-labels"></div>
+    </div>
+
+    <!-- Pattern Insights -->
+    <div class="section">
+        <div class="section-title">Your patterns</div>
+        <div class="insight-cards" id="insight-cards">
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <p>Log for at least 5 days to unlock pattern insights.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peer Comparison -->
+    <div class="section">
+        <div class="section-title">How peers like you are doing</div>
+        <div class="peer-comparison" id="peer-section"></div>
+    </div>
+
+    <!-- Log History -->
+    <div class="section">
+        <div class="section-title">Recent logs</div>
+        <div class="log-history" id="log-history">
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <p>No logs yet. Click "Log Today" to start tracking.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem('pathpilot_user') || '{}');
+    const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+    const focusLabels = { dsa:'DSA', webdev:'Web Dev', ai:'AI/ML', other:'Other' };
+    const moodEmoji = { stuck:'😤', okay:'😐', good:'😊', great:'🔥' };
+    const badgeClass = { dsa:'badge-dsa', webdev:'badge-webdev', ai:'badge-ai', other:'badge-other' };
+
+    // Greeting
+    const hour = new Date().getHours();
+    const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greeting').textContent = user.name ? `${timeGreet}, ${user.name}` : timeGreet;
+
+    // Stats
+    const studiedLogs = logs.filter(l => l.studied);
+    const totalDays = logs.length;
+    const consistency = totalDays > 0 ? Math.round((studiedLogs.length / totalDays) * 100) : 0;
+    const totalHours = studiedLogs.reduce((s, l) => s + (l.hours || 0), 0);
+    const avgHours = studiedLogs.length > 0 ? (totalHours / studiedLogs.length).toFixed(1) : 0;
+
+    const sorted = [...logs].sort((a,b) => new Date(b.date) - new Date(a.date));
+    let streak = 0;
+    for (let l of sorted) { if (l.studied) streak++; else break; }
+
+    document.getElementById('totalDays').textContent = totalDays;
+    document.getElementById('consistency').textContent = consistency + '%';
+    document.getElementById('streak').textContent = streak;
+    document.getElementById('avgHours').textContent = avgHours + 'h';
+
+    // Current Decision
+    if (user.focus) {
+        document.getElementById('decision-focus').textContent = focusLabels[user.focus] || user.focus;
+        document.getElementById('decision-badge').textContent = focusLabels[user.focus] || user.focus;
+        document.getElementById('decision-badge').className = 'decision-badge ' + (badgeClass[user.focus] || '');
+        if (user.currentDecision && user.currentDecision.startDate) {
+            const start = new Date(user.currentDecision.startDate);
+            const days = Math.floor((new Date() - start) / (1000*60*60*24));
+            const pct = Math.min(Math.round((days / 56) * 100), 100);
+            document.getElementById('decision-meta').textContent = `Started ${start.toLocaleDateString('en-IN', {day:'numeric',month:'short'})} · ${days} days in`;
+            document.getElementById('progress-pct').textContent = pct + '%';
+            document.getElementById('progress-bar').style.width = pct + '%';
         }
-        
-        function showPayment() {
-            document.getElementById('payment-section').style.display = 'block';
-            document.getElementById('premiumBtn').style.display = 'none';
+    }
+
+    // Heatmap
+    const logMap = {};
+    logs.forEach(l => { logMap[l.date] = l; });
+    const heatGrid = document.getElementById('heat-grid');
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().split('T')[0];
+        const cell = document.createElement('div');
+        cell.className = 'heat-cell';
+        if (logMap[key]) {
+            const h = logMap[key].hours || 0;
+            if (h >= 4) cell.classList.add('l3');
+            else if (h >= 2) cell.classList.add('l2');
+            else cell.classList.add('l1');
+        }
+        cell.title = key + (logMap[key] ? ` · ${logMap[key].hours}h` : '');
+        heatGrid.appendChild(cell);
+    }
+
+    // Weekly chart
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const today = new Date();
+    const dayOfWeek = (today.getDay() + 6) % 7;
+    const weekData = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = d.toISOString().split('T')[0];
+        weekData.push({ day: days[(d.getDay() + 6) % 7], hours: logMap[key]?.hours || 0, isToday: i === 0 });
+    }
+    const maxH = Math.max(...weekData.map(d => d.hours), 1);
+    const barContainer = document.getElementById('week-bar');
+    const labelContainer = document.getElementById('week-labels');
+    weekData.forEach(d => {
+        const bar = document.createElement('div');
+        const pct = Math.round((d.hours / maxH) * 100);
+        bar.className = 'w-bar' + (d.isToday ? ' active' : '');
+        bar.style.height = Math.max(pct, 4) + '%';
+        bar.title = `${d.day}: ${d.hours}h`;
+        barContainer.appendChild(bar);
+        const lbl = document.createElement('div');
+        lbl.className = 'w-label';
+        lbl.textContent = d.day;
+        labelContainer.appendChild(lbl);
+    });
+
+    // Pattern insights
+    if (logs.length >= 5) {
+        const insights = [];
+        // Quit pattern
+        const recentStudied = sorted.slice(0, 14).map(l => l.studied);
+        let longestBreak = 0, cur = 0;
+        recentStudied.forEach(s => { if (!s) { cur++; longestBreak = Math.max(longestBreak, cur); } else cur = 0; });
+        if (longestBreak >= 3) {
+            insights.push({ type: 'warning', icon: '⚠️', text: `You had a gap of <strong>${longestBreak} consecutive days</strong> without studying recently. This is a common quit pattern — week 3 is the hardest.` });
+        }
+        // Consistency
+        if (consistency >= 70) {
+            insights.push({ type: 'success', icon: '✅', text: `You have a <strong>${consistency}% consistency rate</strong> — that's in the top tier. Students above 70% are 3x more likely to report positive outcomes.` });
+        } else if (consistency < 40 && totalDays > 7) {
+            insights.push({ type: 'warning', icon: '📉', text: `Your consistency is <strong>${consistency}%</strong>. Students who study fewer than 4 days a week rarely see measurable skill growth. Small, daily sessions beat long sporadic ones.` });
+        }
+        // Regret signal
+        const regretLogs = logs.filter(l => l.regret);
+        if (regretLogs.length >= 3) {
+            const avgRegret = Math.round(regretLogs.reduce((s,l) => s + l.regret, 0) / regretLogs.length);
+            if (avgRegret >= 7) {
+                insights.push({ type: 'warning', icon: '🤔', text: `Your average regret score is <strong>${avgRegret}/10</strong>. High regret often signals misalignment between your goal and your current path. Worth reflecting.` });
+            } else if (avgRegret <= 3) {
+                insights.push({ type: 'success', icon: '🎯', text: `Your regret score is low (<strong>${avgRegret}/10</strong>) — a strong signal that you're on the right path for you. Trust the process.` });
+            }
+        }
+        // Hours
+        if (avgHours >= 3) {
+            insights.push({ type: 'success', icon: '⏱️', text: `You're averaging <strong>${avgHours} hours</strong> per study day. That's solid depth — quality over quantity is the right approach.` });
+        }
+        // Streak
+        if (streak >= 7) {
+            insights.push({ type: 'success', icon: '🔥', text: `<strong>${streak}-day streak!</strong> This is significant — most students break their streak around day 4. You've pushed past the first wall.` });
+        }
+        // Default
+        if (insights.length === 0) {
+            insights.push({ type: 'info', icon: '📊', text: `Keep logging daily. Patterns take <strong>2–3 weeks</strong> to emerge. You'll see your behavioral fingerprint clearly by then.` });
         }
 
-        function updatePremiumInsights() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const insightsContainer = document.getElementById('insights-content');
-            const premiumBtn = document.getElementById('premiumBtn');
-            
-            if (isPremium) {
-                insightsContainer.innerHTML = 'You are most consistent on days 1–3 but tend to drop after that';
-                insightsContainer.style.color = '#10b981';
-                if (premiumBtn) premiumBtn.style.display = 'none';
-            } else {
-                insightsContainer.innerHTML = 'Unlock Premium for ₹10 to see your patterns and insights';
-                insightsContainer.style.color = '#f59e0b';
-                if (premiumBtn) premiumBtn.style.display = 'block';
-            }
-        }
-        
-        // Run on load
-        updateStats();
-        updatePremiumInsights();
-    </script>
+        const container = document.getElementById('insight-cards');
+        container.innerHTML = insights.map(i => `
+            <div class="insight-card ${i.type}">
+                <div class="insight-icon">${i.icon}</div>
+                <div class="insight-text">${i.text}</div>
+            </div>
+        `).join('');
+    }
+
+    // Peer comparison
+    const peerData = {
+        placement: { dsa: { consistency: 72, avgHours: 2.8, satisfaction: 65 }, webdev: { consistency: 58, avgHours: 3.2, satisfaction: 78 }, ai: { consistency: 55, avgHours: 2.5, satisfaction: 72 }, other: { consistency: 50, avgHours: 2.2, satisfaction: 60 } },
+        freelancing: { webdev: { consistency: 68, avgHours: 3.5, satisfaction: 82 }, dsa: { consistency: 55, avgHours: 2.5, satisfaction: 50 }, ai: { consistency: 60, avgHours: 3.0, satisfaction: 75 }, other: { consistency: 52, avgHours: 2.8, satisfaction: 65 } },
+        startup: { ai: { consistency: 62, avgHours: 3.8, satisfaction: 85 }, webdev: { consistency: 65, avgHours: 3.5, satisfaction: 80 }, dsa: { consistency: 58, avgHours: 2.5, satisfaction: 55 }, other: { consistency: 55, avgHours: 3.0, satisfaction: 70 } },
+        exploration: { dsa: { consistency: 48, avgHours: 2.0, satisfaction: 58 }, webdev: { consistency: 55, avgHours: 2.5, satisfaction: 70 }, ai: { consistency: 52, avgHours: 2.8, satisfaction: 72 }, other: { consistency: 50, avgHours: 2.2, satisfaction: 65 } }
+    };
+    const goal = user.goal || 'placement';
+    const focus = user.focus || 'dsa';
+    const peers = peerData[goal]?.[focus] || { consistency: 60, avgHours: 2.5, satisfaction: 65 };
+    const peerSection = document.getElementById('peer-section');
+    const metrics = [
+        { label: 'Avg consistency', peer: peers.consistency + '%', yours: consistency + '%', userVal: consistency, peerVal: peers.consistency, color: '#10b981' },
+        { label: 'Avg hours/day', peer: peers.avgHours + 'h', yours: avgHours + 'h', userVal: parseFloat(avgHours), peerVal: peers.avgHours, color: '#3b82f6' },
+        { label: 'Reported satisfaction', peer: peers.satisfaction + '%', yours: '—', userVal: null, peerVal: peers.satisfaction, color: '#f59e0b' }
+    ];
+    peerSection.innerHTML = `<div style="font-size:0.8rem;color:#555;margin-bottom:1rem;">Students with goal: <strong style="color:#888">${goal}</strong>, focus: <strong style="color:#888">${focusLabels[focus]||focus}</strong></div>` +
+        metrics.map(m => `
+        <div class="peer-row">
+            <div class="peer-row-label">
+                <span>${m.label}</span>
+                <span style="color:${m.color}">Peers: ${m.peer}${m.userVal !== null ? ' · You: ' + m.yours : ''}</span>
+            </div>
+            <div style="background:#2d2d2d;border-radius:4px;height:5px;margin-bottom:2px;">
+                <div style="background:${m.color};width:${m.peerVal}%;height:5px;border-radius:4px;"></div>
+            </div>
+            ${m.userVal !== null ? `<div style="background:rgba(255,255,255,0.05);border-radius:4px;height:5px;">
+                <div style="background:rgba(255,255,255,0.3);width:${Math.min(m.userVal,100)}%;height:5px;border-radius:4px;"></div>
+            </div>` : ''}
+        </div>
+    `).join('');
+
+    // Log history
+    if (logs.length > 0) {
+        const historyEl = document.getElementById('log-history');
+        historyEl.innerHTML = sorted.slice(0, 10).map(l => `
+            <div class="log-item">
+                <div class="log-dot ${l.studied ? 'studied' : 'skipped'}"></div>
+                <div class="log-date">${new Date(l.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+                <div class="log-task">${l.task || (l.studied ? 'Studied' : 'Skipped')}</div>
+                <div class="log-hours">${l.hours ? l.hours + 'h' : ''}</div>
+                <div class="log-mood">${moodEmoji[l.mood] || ''}</div>
+            </div>
+        `).join('');
+    }
+</script>
 </body>
 </html>

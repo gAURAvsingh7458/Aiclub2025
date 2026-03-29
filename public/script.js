@@ -903,12 +903,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Startup logic
-    if (currentUserId) {
-        userStatus.textContent = `Session Restored (ID: ${currentUserId})`;
-        userStatus.style.color = 'var(--cyan)';
-        fetchDashboardData(currentUserId);
-    } else {
-        fetchLeaderboard();
+    // Secure Session Validation & UI Construction
+    async function verifySessionAndInitProfile() {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const user = await res.json();
+                currentUserId = user.id;
+                userStatus.textContent = `Session Verified`;
+                userStatus.style.color = 'var(--cyan)';
+                
+                const profileWidget = document.getElementById('profileWidget');
+                if (profileWidget) {
+                    const initials = (user.name || 'S').substring(0, 2).toUpperCase();
+                    const avatarSrc = user.picture ? `<img src="${user.picture}" class="profile-avatar" alt="Avatar">` : `<div class="profile-avatar">${initials}</div>`;
+                    const drpAvatarSrc = user.picture ? `<img src="${user.picture}" class="dropdown-avatar" alt="Avatar">` : `<div class="dropdown-avatar">${initials}</div>`;
+                    const firstName = user.name ? user.name.split(' ')[0] : 'Student';
+                    
+                    profileWidget.innerHTML = `
+                        <button class="profile-btn" id="profileDropdownBtn">
+                            ${avatarSrc}
+                            <span class="profile-name">${firstName}</span>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdownMenu">
+                            <div class="dropdown-user-info">
+                                ${drpAvatarSrc}
+                                <div class="dropdown-text">
+                                    <h4>${user.name || 'Anonymous Student'}</h4>
+                                    <p>${user.email || user.username || 'No email provided'}</p>
+                                </div>
+                            </div>
+                            <button class="dropdown-logout-btn" id="logoutBtn">
+                                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('profileDropdownBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('profileDropdownMenu').classList.toggle('open');
+                    });
+                    
+                    document.addEventListener('click', (e) => {
+                        const menu = document.getElementById('profileDropdownMenu');
+                        if (menu && menu.classList.contains('open') && !e.target.closest('#profileWidget')) {
+                            menu.classList.remove('open');
+                        }
+                    });
+                    
+                    document.getElementById('logoutBtn').addEventListener('click', async () => {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        localStorage.removeItem('pathpilot_userId');
+                        window.location.href = '/login.html';
+                    });
+                    
+                    if(window.lucide) window.lucide.createIcons();
+                }
+                
+                fetchDashboardData(currentUserId);
+            } else {
+                throw new Error("Invalid session");
+            }
+        } catch(e) {
+            localStorage.removeItem('pathpilot_userId');
+            const profileWidget = document.getElementById('profileWidget');
+            if (profileWidget) {
+                profileWidget.innerHTML = `<button class="btn btn-glow" onclick="window.location.href='/login.html'" style="padding: 0.5rem 1.25rem;">Sign In</button>`;
+            }
+            if (!window.location.pathname.includes('login.html')) window.location.href = '/login.html';
+        }
     }
+    
+    verifySessionAndInitProfile();
 });

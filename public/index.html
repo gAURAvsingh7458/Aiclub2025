@@ -35,6 +35,15 @@
         <!-- Main Content -->
         <main class="main-content">
             
+            <!-- ====== TOP NAVBAR (PROFILE WIDGET) ====== -->
+            <header class="app-topbar">
+                <div class="topbar-right">
+                    <div id="profileWidget" class="profile-widget">
+                        <!-- Profile State dynamically injected by script.js -->
+                    </div>
+                </div>
+            </header>
+
             <!-- ====== DASHBOARD TAB ====== -->
             <section id="dashboard-section" class="tab-content active">
                 <header class="top-header animate-slide-in">
@@ -62,7 +71,7 @@
                     <div style="flex: 1; padding-right: 2rem;">
                         <h2 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-main); font-family: 'Playfair Display', serif;">Design your future.</h2>
                         <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; max-width: 500px;">Capture your focus, track global market arrays natively, and deploy intelligent insights mapped explicitly alongside native design vectors seamlessly.</p>
-                        <button class="btn btn-glow" style="margin-top: 1.5rem;" onclick="document.querySelector('[data-target=\\'study-section\\']').click()">Log Study</button>
+                        <button class="btn btn-glow" style="margin-top: 1.5rem;" onclick="document.querySelector('[data-target=\'study-section\']').click()">Log Study</button>
                     </div>
                     <div class="illustration-wrapper" style="flex: 1; text-align: right; overflow: hidden;">
                         <!-- Inline SVG representing a Canva professional -->
@@ -258,7 +267,7 @@
                         <i data-lucide="message-circle" style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--text-muted);"></i>
                         <h2 style="color: var(--text-main); font-size: 1.5rem; margin-bottom: 0.5rem;">Profile Required</h2>
                         <p style="margin: 0.5rem 0 1.5rem; color: var(--text-muted);">Complete your profile to join the chat &rarr;</p>
-                        <button class="btn btn-glow" onclick="document.querySelector('[data-target=\\'premium-section\\']').click()">Set Up Profile</button>
+                        <button class="btn btn-glow" onclick="document.querySelector('[data-target=\'premium-section\']').click()">Set Up Profile</button>
                     </div>
 
                     <!-- Chat Header Tabs -->

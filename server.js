@@ -54,7 +54,7 @@ app.get('/api/auth/client-id', (req, res) => {
 // Check current user session
 app.get('/api/auth/me', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
-    const sql = `SELECT id, name, username, tier, year, goal FROM users WHERE id = ?`;
+    const sql = `SELECT id, name, username, email, picture, tier, year, goal, focus FROM users WHERE id = ?`;
     db.get(sql, [req.session.userId], (err, row) => {
         if (err || !row) return res.status(401).json({ error: 'Not authenticated' });
         res.json(row);
@@ -113,24 +113,27 @@ app.post('/api/auth/google', async (req, res) => {
         const googleId = payload['sub'];
         const email = payload['email'];
         const name = payload['name'];
+        const picture = payload['picture'];
         
         // Check if user exists by Google ID
         db.get(`SELECT * FROM users WHERE googleId = ?`, [googleId], (err, user) => {
             if (err) return res.status(500).json({ error: 'Database error' });
             if (user) {
-                // Login
+                // Update avatar if it changed on Google's end
+                if (user.picture !== picture) {
+                    db.run(`UPDATE users SET picture = ? WHERE id = ?`, [picture, user.id]);
+                }
                 req.session.userId = user.id;
-                return res.json({ id: user.id, name: user.name });
+                return res.json({ id: user.id, name: user.name, picture });
             } else {
                 // Auto Signup
-                // Generate unique username based on email or name
                 const generatedUsername = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
                 const joinedAt = new Date().toISOString().split('T')[0];
-                const sql = `INSERT INTO users (name, username, googleId, tier, joined_at) VALUES (?, ?, ?, 'Free', ?)`;
-                db.run(sql, [name, generatedUsername, googleId, joinedAt], function(err) {
+                const sql = `INSERT INTO users (name, username, email, picture, googleId, tier, joined_at) VALUES (?, ?, ?, ?, ?, 'Free', ?)`;
+                db.run(sql, [name, generatedUsername, email, picture, googleId, joinedAt], function(err) {
                     if (err) return res.status(500).json({ error: 'Signup failed', details: err.message });
                     req.session.userId = this.lastID;
-                    res.json({ id: this.lastID, name, username: generatedUsername });
+                    res.json({ id: this.lastID, name, username: generatedUsername, picture });
                 });
             }
         });

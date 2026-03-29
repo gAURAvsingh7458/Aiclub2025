@@ -36,6 +36,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
             addCol('users', 'username', 'TEXT');
             addCol('users', 'password_hash', 'TEXT');
             addCol('users', 'googleId', 'TEXT');
+            addCol('users', 'email', 'TEXT');
+            addCol('users', 'picture', 'TEXT');
             db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)');
             db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_googleId ON users(googleId)');
 

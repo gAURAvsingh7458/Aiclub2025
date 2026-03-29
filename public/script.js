@@ -187,6 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let currentUserId = localStorage.getItem('pathpilot_userId');
+    if (!currentUserId && window.location.pathname !== '/login.html') {
+        window.location.href = '/login.html';
+        return;
+    }
     let currentDashboardState = null;
     let topMarketSkill = "Generative AI"; // Initial fallback
 

@@ -3,6 +3,11 @@ const path = require('path');
 const cors = require('cors');
 const db = require('./database');
 const cron = require('node-cron');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'change-me');
 
 // Mock AI Integration fallback for Market Trends
 let cachedMarketTrends = [
@@ -30,8 +35,110 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    // Note: Use a SQLite store for sessions in production to survive restarts
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
+}));
 
 // --- API Endpoints ---
+
+// --- Authentication Endpoints ---
+
+app.get('/api/auth/client-id', (req, res) => {
+    res.json({ clientId: process.env.GOOGLE_CLIENT_ID || 'change-me' });
+});
+
+// Check current user session
+app.get('/api/auth/me', (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
+    const sql = `SELECT id, name, username, tier, year, goal FROM users WHERE id = ?`;
+    db.get(sql, [req.session.userId], (err, row) => {
+        if (err || !row) return res.status(401).json({ error: 'Not authenticated' });
+        res.json(row);
+    });
+});
+
+// Logout
+app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy();
+    res.json({ message: 'Logged out' });
+});
+
+// Standard Signup
+app.post('/api/auth/signup', async (req, res) => {
+    const { name, username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Missing credentials' });
+    
+    try {
+        const hash = await bcrypt.hash(password, 10);
+        const joinedAt = new Date().toISOString().split('T')[0];
+        const sql = `INSERT INTO users (name, username, password_hash, tier, joined_at) VALUES (?, ?, ?, 'Free', ?)`;
+        db.run(sql, [name || username, username, hash, joinedAt], function(err) {
+            if (err) return res.status(400).json({ error: 'Username may already be taken' });
+            req.session.userId = this.lastID;
+            res.json({ id: this.lastID, username, name });
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error during signup' });
+    }
+});
+
+// Standard Login
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+    db.get(`SELECT * FROM users WHERE username = ?`, [username], async (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (!user || !user.password_hash) return res.status(401).json({ error: 'Invalid credentials' });
+        
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+        
+        req.session.userId = user.id;
+        res.json({ id: user.id, username: user.username, name: user.name });
+    });
+});
+
+// Google OAuth Verification
+app.post('/api/auth/google', async (req, res) => {
+    const { token } = req.body;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        const payload = ticket.getPayload();
+        const googleId = payload['sub'];
+        const email = payload['email'];
+        const name = payload['name'];
+        
+        // Check if user exists by Google ID
+        db.get(`SELECT * FROM users WHERE googleId = ?`, [googleId], (err, user) => {
+            if (err) return res.status(500).json({ error: 'Database error' });
+            if (user) {
+                // Login
+                req.session.userId = user.id;
+                return res.json({ id: user.id, name: user.name });
+            } else {
+                // Auto Signup
+                // Generate unique username based on email or name
+                const generatedUsername = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+                const joinedAt = new Date().toISOString().split('T')[0];
+                const sql = `INSERT INTO users (name, username, googleId, tier, joined_at) VALUES (?, ?, ?, 'Free', ?)`;
+                db.run(sql, [name, generatedUsername, googleId, joinedAt], function(err) {
+                    if (err) return res.status(500).json({ error: 'Signup failed', details: err.message });
+                    req.session.userId = this.lastID;
+                    res.json({ id: this.lastID, name, username: generatedUsername });
+                });
+            }
+        });
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid Google token' });
+    }
+});
+
 
 // 1. Create User
 app.post('/api/users', (req, res) => {

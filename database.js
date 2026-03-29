@@ -11,6 +11,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         // Initialize tables
         db.serialize(() => {
             // Users table
+            // Users table
             db.run(`CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
@@ -20,8 +21,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 focus TEXT,
                 confidence INTEGER,
                 why_focus TEXT,
-                joined_at TEXT
+                joined_at TEXT,
+                username TEXT UNIQUE,
+                password_hash TEXT,
+                googleId TEXT UNIQUE
             )`);
+
+            // Safe migration for existing DBs
+            const addCol = (table, col, def) => {
+                db.run(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`, err => {
+                    if (err && !err.message.includes('duplicate column name')) console.error('Migration error:', err.message);
+                });
+            };
+            addCol('users', 'username', 'TEXT');
+            addCol('users', 'password_hash', 'TEXT');
+            addCol('users', 'googleId', 'TEXT');
+            db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)');
+            db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_googleId ON users(googleId)');
 
             // Logs table
             db.run(`CREATE TABLE IF NOT EXISTS logs (

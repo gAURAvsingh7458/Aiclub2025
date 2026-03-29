@@ -240,21 +240,24 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchQuote();
 
     // Theme logic
-    const savedTheme = localStorage.getItem('pathpilot_theme') || 'dark';
-    if (savedTheme === 'light') {
-        document.body.classList.remove('dark-theme');
-        if (themeToggle) themeToggle.innerHTML = '🌙 Dark Mode';
-    } else {
+    // Light is the default. Dark is opt-in via saved preference.
+    const savedTheme = localStorage.getItem('pathpilot_theme') || 'light';
+    if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        if (themeToggle) themeToggle.innerHTML = '☀️ Light Mode';
+        if (themeToggle) themeToggle.textContent = '☀️ Light Mode';
+    } else {
+        document.body.classList.remove('dark-theme');
+        if (themeToggle) themeToggle.textContent = '🌙 Dark Mode';
     }
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
             const isDark = document.body.classList.contains('dark-theme');
-            themeToggle.innerHTML = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+            themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
             localStorage.setItem('pathpilot_theme', isDark ? 'dark' : 'light');
+            // Re-initialise Lucide so SVG icons pick up new CSS var colours
+            if (window.lucide) window.lucide.createIcons();
         });
     }
 

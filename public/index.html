@@ -10,14 +10,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="dark-theme">
+<body>
     <div class="app-layout">
         
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="logo">
-                <span class="logo-icon">🚀</span> 
-                PathPilot
+                <span class="logo-icon">🚀</span>
+                <span class="logo-wordmark">PathPilot</span>
             </div>
             <nav id="sidebarNav">
                 <a href="#" class="nav-link active" data-target="dashboard-section" title="My Dashboard"><i data-lucide="grid" class="nav-icon"></i> <span class="nav-text">Dashboard</span></a>
@@ -26,8 +26,8 @@
                 <a href="#" class="nav-link" data-target="premium-section" title="Premium Features"><i data-lucide="zap" class="nav-icon"></i> <span class="nav-text">Settings</span></a>
             </nav>
             <div class="sidebar-footer">
-                <button id="themeToggle" class="btn btn-glow" style="width: 100%;">☀️ Light Mode</button>
-                <div id="userStatus" class="status-msg" style="margin-top: 1rem; text-align: center;">Not logged in</div>
+                <button id="themeToggle">🌙 Dark Mode</button>
+                <div id="userStatus" class="status-msg">Loading...</div>
             </div>
         </aside>
 
@@ -37,7 +37,9 @@
             <!-- ====== DASHBOARD TAB ====== -->
             <section id="dashboard-section" class="tab-content active">
                 <header class="top-header animate-slide-in">
-                    <h1 id="missionControlHeading" style="font-size: 2.5rem; letter-spacing: -1px;">Mission Control</h1>
+                    <h1 id="missionControlHeading" style="font-size: 2.5rem; letter-spacing: -1px;">Mission Control</h1><div class="canva-hero-img">
+    <img src="https://illustrations.popsy.co/white/student-going-to-school.svg" alt="Study Progress" style="width: 100%; max-width: 400px; display: block; margin: 0 auto;">
+</div>
                     <p id="missionControlSub" style="color: var(--cyan); font-size: 1.15rem; font-weight: 500; margin-top: 0.5rem; letter-spacing: 0.5px;">Target: Awaiting Data | Status: 0% Ready</p>
                     <div id="insightsCard" class="insights-alert" style="display: none;">
                         <strong>💡 Insight:</strong> <span id="moodInsightText"></span>

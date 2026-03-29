@@ -7,8 +7,8 @@ WORKDIR /app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-# Install dependencies, this might build sqlite3 from source if necessary
-RUN npm install --production
+# Install dependencies, this will build sqlite3 from source against the container's glibc
+RUN npm install --production --build-from-source=sqlite3
 
 # Bundle app source
 COPY . .

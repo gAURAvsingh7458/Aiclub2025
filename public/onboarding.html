@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathPilot – Get Started</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .container {
+            background-color: #141414;
+            border: 1px solid #2d2d2d;
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 440px;
+        }
+        .step-indicator {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 2rem;
+        }
+        .step-dot {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+            background: #2d2d2d;
+            transition: background 0.3s;
+        }
+        .step-dot.active { background: #3b82f6; }
+        .step-dot.done { background: #10b981; }
+        .step { display: none; }
+        .step.active { display: block; }
+        .step-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #3b82f6;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        h2 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .step-desc { font-size: 0.9rem; color: #666; margin-bottom: 2rem; line-height: 1.5; }
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 0.4rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        option { background: #1e1e1e; }
+        textarea { resize: none; min-height: 80px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .option-card {
+            padding: 1rem;
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            text-align: center;
+        }
+        .option-card:hover { border-color: #3b82f6; }
+        .option-card.selected { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .option-card .oc-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+        .option-card .oc-title { font-size: 0.85rem; font-weight: 600; color: #fff; }
+        .option-card .oc-desc { font-size: 0.74rem; color: #555; margin-top: 0.2rem; }
+        .btn-row { display: flex; gap: 0.75rem; margin-top: 1.75rem; }
+        .btn-back {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            background: transparent;
+            color: #666;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .btn-back:hover { color: #fff; border-color: #555; }
+        .btn-next {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-next:hover { background-color: #2563eb; transform: translateY(-1px); }
+        .confidence-row { display: flex; align-items: center; gap: 1rem; }
+        .confidence-row input[type=range] { flex: 1; accent-color: #3b82f6; }
+        .confidence-val { font-size: 1.2rem; font-weight: 700; color: #3b82f6; min-width: 30px; text-align: right; }
+        .archetype-box {
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .archetype-title { font-size: 1rem; font-weight: 600; color: #3b82f6; margin-bottom: 0.4rem; }
+        .archetype-desc { font-size: 0.85rem; color: #888; line-height: 1.6; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="step-indicator">
+        <div class="step-dot active" id="dot0"></div>
+        <div class="step-dot" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- Step 1: Basic Info -->
+    <div class="step active" id="step0">
+        <div class="step-label">Step 1 of 4</div>
+        <h2>Who are you?</h2>
+        <p class="step-desc">Let's start with some basics so we can personalise your experience.</p>
+        <div class="form-group">
+            <label>Your name</label>
+            <input type="text" id="name" placeholder="e.g. Gaurav" />
+        </div>
+        <div class="form-group">
+            <label>College tier</label>
+            <select id="tier">
+                <option value="" disabled selected>Select your tier</option>
+                <option value="tier1">Tier 1 (IIT/NIT/IIIT)</option>
+                <option value="tier2">Tier 2 (State Engg. College)</option>
+                <option value="tier3">Tier 3 (Private College)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Year of study</label>
+            <select id="year">
+                <option value="" disabled selected>Select year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+            </select>
+        </div>
+        <div class="btn-row">
+            <button class="btn-next" onclick="nextStep(0)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Step 2: Goal -->
+    <div class="step" id="step1">
+        <div class="step-label">Step 2 of 4</div>
+        <h2>What's your main goal?</h2>
+        <p class="step-desc">Be honest. There's no wrong answer — this shapes your insights.</p>
+        <div class="options-grid" id="goals-grid">
+            <div class="option-card" onclick="selectOption('goal','placement',this)">
+                <div class="oc-icon">💼</div>
+                <div class="oc-title">Placement</div>
+                <div class="oc-desc">Get a job at a good company</div>
+            </div>
+            <div class="option-card" onclick="selectOption('goal','freelancing',this)">
+                <div class="oc-icon">💻</div>
+                <div class="oc-title">Freelancing</div>
+                <div class="oc-desc">Build skills to work independently</div>
+            </div>
+            <div class="option-card" onclick="selectOption('goal','startup',this)">
+                <div class="oc-icon">🚀</div>
+                <div class="oc-title">Startup</div>
+                <div class="oc-desc">Build something of my own</div>
+            </div>
+            <div class="option-card" onclick="selectOption('goal','exploration',this)">
+                <div class="oc-icon">🔭</div>
+                <div class="oc-title">Exploration</div>
+                <div class="oc-desc">Still figuring things out</div>
+            </div>
+        </div>
+        <div class="btn-row">
+            <button class="btn-back" onclick="prevStep(1)">← Back</button>
+            <button class="btn-next" onclick="nextStep(1)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Step 3: Current Focus -->
+    <div class="step" id="step2">
+        <div class="step-label">Step 3 of 4</div>
+        <h2>What are you focusing on?</h2>
+        <p class="step-desc">Your first decision to track. What are you betting your time on right now?</p>
+        <div class="options-grid" id="focus-grid">
+            <div class="option-card" onclick="selectOption('focus','dsa',this)">
+                <div class="oc-icon">🧩</div>
+                <div class="oc-title">DSA</div>
+                <div class="oc-desc">Data structures & algorithms</div>
+            </div>
+            <div class="option-card" onclick="selectOption('focus','webdev',this)">
+                <div class="oc-icon">🌐</div>
+                <div class="oc-title">Web Dev</div>
+                <div class="oc-desc">Frontend / backend / fullstack</div>
+            </div>
+            <div class="option-card" onclick="selectOption('focus','ai',this)">
+                <div class="oc-icon">🤖</div>
+                <div class="oc-title">AI / ML</div>
+                <div class="oc-desc">Machine learning & AI</div>
+            </div>
+            <div class="option-card" onclick="selectOption('focus','other',this)">
+                <div class="oc-icon">⚡</div>
+                <div class="oc-title">Other</div>
+                <div class="oc-desc">DevOps, CP, Mobile, etc.</div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:1rem;">
+            <label>Why did you choose this over the alternatives?</label>
+            <textarea id="whyFocus" placeholder="e.g. Everyone says DSA is needed for placements..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>How confident are you in this choice? <span id="confLabel" style="color:#3b82f6;font-weight:600;">5</span>/10</label>
+            <input type="range" min="1" max="10" value="5" id="confidence" oninput="document.getElementById('confLabel').textContent=this.value">
+        </div>
+        <div class="btn-row">
+            <button class="btn-back" onclick="prevStep(2)">← Back</button>
+            <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Archetype reveal -->
+    <div class="step" id="step3">
+        <div class="step-label">Step 4 of 4</div>
+        <h2>Your profile</h2>
+        <p class="step-desc">Based on your answers, here's what students like you have experienced.</p>
+        <div class="archetype-box" id="archetype-box">
+            <div class="archetype-title" id="archetype-title">The Explorer</div>
+            <div class="archetype-desc" id="archetype-desc">Loading your archetype...</div>
+        </div>
+        <div id="peer-data" style="background:#1e1e1e;border:1px solid #2d2d2d;border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+            <div style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">Students with a similar profile chose:</div>
+            <div id="peer-bars"></div>
+        </div>
+        <div class="btn-row">
+            <button class="btn-back" onclick="prevStep(3)">← Back</button>
+            <button class="btn-next" onclick="finish()" style="background:#10b981;">Let's go →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const userData = { goal: '', focus: '', confidence: 5 };
+    const peerData = {
+        placement: { dsa: 68, webdev: 18, ai: 10, other: 4 },
+        freelancing: { dsa: 20, webdev: 55, ai: 15, other: 10 },
+        startup: { dsa: 25, webdev: 35, ai: 30, other: 10 },
+        exploration: { dsa: 40, webdev: 30, ai: 20, other: 10 }
+    };
+    const archetypes = {
+        placement_dsa: { title: 'The Strategic Grinder', desc: 'You\'re playing the placement game deliberately. 68% of students like you chose DSA. Those who stayed consistent for 8+ weeks had a 3x higher interview rate. The risk: burning out by week 4. Your first milestone: 3 solid weeks without switching.' },
+        placement_webdev: { title: 'The Contrarian', desc: 'Only 18% of placement-focused students chose Web Dev. Those who did took longer to get interviews but reported higher satisfaction. You\'ll need a strong project to substitute for pure DSA prep.' },
+        placement_ai: { title: 'The Early Mover', desc: 'AI skills are increasingly valued but the placement pipeline for it is less mature. Students like you who combined AI with basic DSA saw the best outcomes.' },
+        freelancing_webdev: { title: 'The Builder', desc: '55% of freelancing-focused students chose Web Dev. It\'s the right call — the feedback loop is fast and clients exist immediately. Build one real project in 8 weeks.' },
+        startup_ai: { title: 'The Visionary', desc: 'AI + startup is a high-risk, high-reward path. Students here had the most variance in outcomes — some built impressive projects, some got lost in tutorials. You need a concrete project idea to stay grounded.' },
+        default: { title: 'The Uncertain Optimizer', desc: 'You\'re in a common spot — high confusion, low clarity. The good news: tracking your decisions over 4 weeks gives you more self-knowledge than most students accumulate in a year.' }
+    };
+
+    function selectOption(type, value, el) {
+        const grid = el.parentElement;
+        grid.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        userData[type] = value;
+    }
+
+    function nextStep(current) {
+        if (current === 0) {
+            if (!document.getElementById('name').value.trim()) { alert('Please enter your name'); return; }
+            if (!document.getElementById('tier').value) { alert('Please select your college tier'); return; }
+            if (!document.getElementById('year').value) { alert('Please select your year'); return; }
+        }
+        if (current === 1 && !userData.goal) { alert('Please select a goal'); return; }
+        if (current === 2) {
+            if (!userData.focus) { alert('Please select your current focus'); return; }
+            userData.confidence = document.getElementById('confidence').value;
+            userData.whyFocus = document.getElementById('whyFocus').value;
+            buildArchetype();
+        }
+        document.getElementById('step' + current).classList.remove('active');
+        document.getElementById('dot' + current).classList.remove('active');
+        document.getElementById('dot' + current).classList.add('done');
+        document.getElementById('step' + (current + 1)).classList.add('active');
+        document.getElementById('dot' + (current + 1)).classList.add('active');
+    }
+
+    function prevStep(current) {
+        document.getElementById('step' + current).classList.remove('active');
+        document.getElementById('dot' + current).classList.remove('active');
+        document.getElementById('dot' + (current - 1)).classList.remove('done');
+        document.getElementById('dot' + (current - 1)).classList.add('active');
+        document.getElementById('step' + (current - 1)).classList.add('active');
+    }
+
+    function buildArchetype() {
+        const key = userData.goal + '_' + userData.focus;
+        const arch = archetypes[key] || archetypes.default;
+        document.getElementById('archetype-title').textContent = arch.title;
+        document.getElementById('archetype-desc').textContent = arch.desc;
+        const peers = peerData[userData.goal] || peerData.placement;
+        const labels = { dsa: 'DSA', webdev: 'Web Dev', ai: 'AI/ML', other: 'Other' };
+        const colors = { dsa: '#3b82f6', webdev: '#10b981', ai: '#f59e0b', other: '#8b5cf6' };
+        let barsHTML = '';
+        Object.entries(peers).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+            const isUser = k === userData.focus;
+            barsHTML += `<div style="margin-bottom:0.6rem;">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px;">
+                    <span style="color:${isUser?'#fff':'#888'};font-weight:${isUser?'600':'400'}">${labels[k]}${isUser?' ← you':''}</span>
+                    <span style="color:${colors[k]};font-weight:600">${v}%</span>
+                </div>
+                <div style="background:#2d2d2d;border-radius:4px;height:6px;">
+                    <div style="background:${colors[k]};width:${v}%;height:6px;border-radius:4px;transition:width 0.8s ease;"></div>
+                </div>
+            </div>`;
+        });
+        document.getElementById('peer-bars').innerHTML = barsHTML;
+    }
+
+    async function finish() {
+        const user = {
+            name: document.getElementById('name').value.trim(),
+            tier: document.getElementById('tier').value,
+            year: document.getElementById('year').value,
+            goal: userData.goal,
+            focus: userData.focus,
+            confidence: userData.confidence,
+            whyFocus: userData.whyFocus,
+            joinedAt: new Date().toISOString()
+        };
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            const data = await res.json();
+            if (data.id) {
+                localStorage.setItem('pathpilot_userId', data.id);
+                // Also cache basic user data so dashboard doesn't feel sluggish or broken
+                user.currentDecision = {
+                    focus: userData.focus,
+                    startDate: new Date().toISOString().split('T')[0],
+                    confidence: userData.confidence,
+                    why: userData.whyFocus,
+                    weeklyCheckins: []
+                };
+                localStorage.setItem('pathpilot_user', JSON.stringify(user));
+                window.location.href = 'dashboard.html';
+            }
+        } catch (e) {
+            console.error('Error:', e);
+            alert('Failed to connect to server');
+        }
+    }
+</script>
+</body>
+</html>

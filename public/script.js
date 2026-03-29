@@ -633,7 +633,155 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =============================================
+    // COMMUNITY CHAT ENGINE
+    // =============================================
+    const chatTabBtns = document.querySelectorAll('.chat-tab-btn');
+    const chatMessagesContainer = document.getElementById('chatMessagesContainer');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatProfileOverlay = document.getElementById('chatProfileOverlay');
+    const chatPeersCount = document.getElementById('chatPeersCount');
+    let currentChatMode = 'anon';
+
+    // Simulate online peers
+    function updatePeersOnline() {
+        if (!chatPeersCount) return;
+        const peers = Math.floor(Math.random() * (12 - 3 + 1)) + 3; // 3 to 12
+        chatPeersCount.textContent = peers;
+    }
+    updatePeersOnline();
+    setInterval(updatePeersOnline, 60000);
+
+    function getAvatarColor(focus, userId, mode) {
+        if (mode === 'anon') {
+            let hash = 0;
+            const str = userId ? userId.toString() : 'guest';
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const colors = ['bg-rand-1', 'bg-rand-2', 'bg-rand-3', 'bg-rand-4', 'bg-rand-5'];
+            return colors[Math.abs(hash) % colors.length];
+        } else {
+            const f = (focus || '').toLowerCase();
+            if (f.includes('dsa')) return 'bg-dsa';
+            if (f.includes('web')) return 'bg-webdev';
+            if (f.includes('ai') || f.includes('ml')) return 'bg-ai';
+            return 'bg-other';
+        }
+    }
+
+    function getInitials(name) {
+        if (!name) return 'A?';
+        const parts = name.split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    function renderChatMessages() {
+        if (!chatMessagesContainer) return;
+        
+        chatMessagesContainer.innerHTML = '';
+        const storageKey = currentChatMode === 'anon' ? 'pathpilot_chat_anon' : 'pathpilot_chat_open';
+        let messages = [];
+        try {
+            messages = JSON.parse(localStorage.getItem(storageKey)) || [];
+        } catch(e) { messages = []; }
+
+        if (messages.length === 0) {
+            chatMessagesContainer.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted); margin: auto;">No messages yet. Be the first to say something 👋</div>`;
+            return;
+        }
+
+        messages.forEach(msg => {
+            const isOwn = msg.senderId === currentUserId;
+            const rowClass = isOwn ? 'row-own' : 'row-peer';
+            const colorClass = getAvatarColor(msg.focus, msg.senderId, msg.mode);
+            const initials = msg.mode === 'anon' ? 'A?' : getInitials(msg.senderLabel);
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const badgeStr = `${msg.year || '1st Year'} &middot; ${msg.focus || 'Undecided'}`;
+
+            const row = document.createElement('div');
+            row.className = `chat-message-row ${rowClass} animate-slide-in`;
+            row.style.animationDuration = '0.3s';
+            row.innerHTML = `
+                <div class="avatar-circle ${colorClass}">${initials}</div>
+                <div style="display: flex; flex-direction: column;">
+                    <div class="chat-meta">
+                        <span class="chat-name-badge" ${msg.mode === 'anon' && !isOwn ? 'style="color: var(--text-muted);"' : ''}>${msg.senderLabel}</span>
+                        <span class="chat-focus-badge">${badgeStr}</span>
+                        <span>${timeStr}</span>
+                    </div>
+                    <div class="message-bubble">${msg.text.replace(/\\n/g, '<br>')}</div>
+                </div>
+            `;
+            chatMessagesContainer.appendChild(row);
+        });
+
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        if(window.lucide) window.lucide.createIcons();
+    }
+
+    function handleSendChatMessage() {
+        if (!chatInput) return;
+        const text = chatInput.value.trim();
+        if (!text || !currentUserId || !currentDashboardState || !currentDashboardState.userProfile) return;
+
+        const profile = currentDashboardState.userProfile;
+        const storageKey = currentChatMode === 'anon' ? 'pathpilot_chat_anon' : 'pathpilot_chat_open';
+        
+        const newMsg = {
+            id: Date.now().toString(),
+            senderId: currentUserId,
+            senderLabel: currentChatMode === 'anon' ? 'Anonymous Student 🎭' : (profile.name || 'Student'),
+            focus: profile.focus || '',
+            year: profile.year || '',
+            text: text,
+            timestamp: new Date().toISOString(),
+            mode: currentChatMode
+        };
+
+        let messages = [];
+        try {
+            messages = JSON.parse(localStorage.getItem(storageKey)) || [];
+        } catch(e) {}
+
+        messages.push(newMsg);
+        if (messages.length > 100) messages = messages.slice(messages.length - 100);
+        
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+        
+        chatInput.value = '';
+        renderChatMessages();
+    }
+
+    if (chatTabBtns) {
+        chatTabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                chatTabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentChatMode = btn.getAttribute('data-tab');
+                renderChatMessages();
+            });
+        });
+    }
+
+    if (chatSendBtn) {
+        chatSendBtn.addEventListener('click', handleSendChatMessage);
+    }
+
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendChatMessage();
+            }
+        });
+    }
+
     // Dashboard Engine
+
     function renderDashboard(logs, userProfile) {
         logsTableBody.innerHTML = '';
         
@@ -669,6 +817,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cache state
         currentDashboardState = { userProfile, logs: sortedLogs, focusPoints: totalFocusPoints, totalHours };
+
+        // Handle Chat Profile Guard
+        const chatProfileOverlay = document.getElementById('chatProfileOverlay');
+        if (chatProfileOverlay) {
+            if (!userProfile) {
+                chatProfileOverlay.style.display = 'flex';
+            } else {
+                chatProfileOverlay.style.display = 'none';
+                renderChatMessages(); // Initial render if profile valid
+            }
+        }
 
         // Update Mission Control Header
         const missionControlSub = document.getElementById('missionControlSub');

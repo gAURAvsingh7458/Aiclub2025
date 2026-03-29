@@ -23,6 +23,7 @@
                 <a href="#" class="nav-link active" data-target="dashboard-section" title="My Dashboard"><i data-lucide="grid" class="nav-icon"></i> <span class="nav-text">Dashboard</span></a>
                 <a href="#" class="nav-link" data-target="study-section" title="Study Tracker"><i data-lucide="book-open" class="nav-icon"></i> <span class="nav-text">Study Logs</span></a>
                 <a href="#" class="nav-link" data-target="market-section" title="Market Insights"><i data-lucide="trending-up" class="nav-icon"></i> <span class="nav-text" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">Market <span class="badge badge-premium">Pro</span></span></a>
+                <a href="#" class="nav-link" data-target="community-section" title="Community"><i data-lucide="message-circle" class="nav-icon"></i> <span class="nav-text">Community</span></a>
                 <a href="#" class="nav-link" data-target="premium-section" title="Premium Features"><i data-lucide="zap" class="nav-icon"></i> <span class="nav-text">Settings</span></a>
             </nav>
             <div class="sidebar-footer">
@@ -236,6 +237,47 @@
                                 </button>
                             </div>
                         </section>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== COMMUNITY CHAT TAB ====== -->
+            <section id="community-section" class="tab-content" style="display: none;">
+                <header class="top-header animate-slide-in">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h1>Community Chat</h1>
+                        <div class="active-peers-badge" id="chatPeersOnline">
+                            <span class="pulse-dot"></span> <span id="chatPeersCount" style="font-weight: 700;">--</span> peers online
+                        </div>
+                    </div>
+                </header>
+
+                <div class="card card-3d animate-slide-in chat-layout" style="animation-delay: 0.1s;">
+                    <!-- Profile Check Overlay -->
+                    <div id="chatProfileOverlay" class="chat-overlay" style="display: none;">
+                        <i data-lucide="message-circle" style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--text-muted);"></i>
+                        <h2 style="color: var(--text-main); font-size: 1.5rem; margin-bottom: 0.5rem;">Profile Required</h2>
+                        <p style="margin: 0.5rem 0 1.5rem; color: var(--text-muted);">Complete your profile to join the chat &rarr;</p>
+                        <button class="btn btn-glow" onclick="document.querySelector('[data-target=\\'premium-section\\']').click()">Set Up Profile</button>
+                    </div>
+
+                    <!-- Chat Header Tabs -->
+                    <div class="chat-header">
+                        <div class="chat-tabs">
+                            <button class="chat-tab-btn active" data-tab="anon">Anonymous Chat</button>
+                            <button class="chat-tab-btn" data-tab="open">Open Profile Chat</button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Area -->
+                    <div id="chatMessagesContainer" class="chat-messages-container">
+                        <!-- Messages render here -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="chat-input-area">
+                        <textarea id="chatInput" placeholder="Type a message... (Enter to send, Shift+Enter for new line)" rows="1"></textarea>
+                        <button id="chatSendBtn" class="btn btn-glow chat-send-btn"><i data-lucide="send" style="width: 18px; height: 18px;"></i></button>
                     </div>
                 </div>
             </section>

@@ -81,6 +81,16 @@ app.post('/api/auth/onboard', (req, res) => {
     });
 });
 
+// Get Online Peers List
+app.get('/api/users/presence', (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
+    const sql = `SELECT id, name, username, picture, bio, is_online FROM users WHERE username IS NOT NULL ORDER BY is_online DESC, username ASC`;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
 // Logout
 app.post('/api/auth/logout', (req, res) => {
     req.session.destroy();

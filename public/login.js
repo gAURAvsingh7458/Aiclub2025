@@ -105,7 +105,7 @@ async function handleCredentialResponse(response) {
         if(res.ok) {
             localStorage.setItem('pathpilot_userId', data.id);
             if (data.requiresOnboarding) {
-                window.location.href = '/onboard.html';
+                window.location.href = '/setup-profile.html';
             } else {
                 window.location.href = '/';
             }

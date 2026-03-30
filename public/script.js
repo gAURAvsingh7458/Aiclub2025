@@ -643,28 +643,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessagesContainer = document.getElementById('chatMessagesContainer');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
-    const chatPeersCount = document.getElementById('chatPeersCount');
+    const onlineUsersList = document.getElementById('onlineUsersList');
+    const userListCount = document.getElementById('userListCount');
     let socket = null;
+    let peersArray = [];
 
     window.initSocket = function() {
         if (!window.io) return;
         socket = io();
 
         socket.on('presence_update', (data) => {
-            updatePeersOnlineUI();
+            // Find user in peers array and update
+            const peerIdx = peersArray.findIndex(p => p.id === data.userId);
+            if (peerIdx > -1) {
+                peersArray[peerIdx].is_online = data.is_online;
+                renderOnlineUsersList();
+            } else {
+                // If it's a new peer, we could re-fetch
+                fetchOnlineUsers();
+            }
         });
 
         socket.on('receive_message', (msg) => {
             appendChatMessage(msg);
         });
+
+        fetchOnlineUsers();
     };
 
-    function updatePeersOnlineUI() {
-        if (!chatPeersCount) return;
-        const peers = Math.floor(Math.random() * 8) + 3; // 3 to 10
-        chatPeersCount.textContent = peers;
+    async function fetchOnlineUsers() {
+        try {
+            const res = await fetch('/api/users/presence');
+            if (res.ok) {
+                peersArray = await res.json();
+                renderOnlineUsersList();
+            }
+        } catch (err) { console.error('Failed to fetch online presence', err); }
     }
-    updatePeersOnlineUI();
+
+    function renderOnlineUsersList() {
+        if (!onlineUsersList) return;
+        
+        peersArray.sort((a, b) => {
+            if (a.is_online !== b.is_online) return b.is_online - a.is_online;
+            return (a.username || '').localeCompare(b.username || '');
+        });
+
+        onlineUsersList.innerHTML = '';
+        const onlineCount = peersArray.filter(p => p.is_online === 1).length;
+        if (userListCount) userListCount.textContent = onlineCount;
+
+        peersArray.forEach(peer => {
+            const initials = peer.name ? peer.name.substring(0, 2).toUpperCase() : 'ST';
+            const avatarHtml = peer.picture 
+                ? `<img src="${peer.picture}" class="user-list-avatar" alt="Avatar">` 
+                : `<div class="user-list-avatar">${initials}</div>`;
+            const dotClass = peer.is_online ? 'presence-dot online' : 'presence-dot';
+
+            const tile = document.createElement('div');
+            tile.className = 'user-list-item animate-slide-in';
+            tile.style.animationDuration = '0.3s';
+            tile.innerHTML = `
+                <div class="user-list-avatar-wrapper">
+                    ${avatarHtml}
+                    <div class="${dotClass}"></div>
+                </div>
+                <div class="user-list-info">
+                    <span class="user-list-name">${peer.name || peer.username}</span>
+                    <span class="user-list-bio" title="${peer.bio || 'New Student'}">${peer.bio || 'New Student'}</span>
+                </div>
+            `;
+            onlineUsersList.appendChild(tile);
+        });
+    }
 
     function appendChatMessage(msg) {
         if (!chatMessagesContainer) return;
@@ -839,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 const user = await res.json();
                 if (user.requiresOnboarding) {
-                    window.location.href = '/onboard.html';
+                    window.location.href = '/setup-profile.html';
                     return;
                 }
                 currentUserId = user.id;

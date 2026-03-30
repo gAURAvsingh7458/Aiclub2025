@@ -1249,3 +1249,105 @@ tbody tr {
     border-color: #ef4444;
     color: white;
 }
+
+/* =============================================
+   DISCORD-STYLE CHAT LAYOUT
+   ============================================= */
+.discord-theme .chat-messages-container {
+    background-color: var(--card-bg);
+}
+
+.chat-message-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.chat-message-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.chat-msg-avatar-col {
+    position: relative;
+    width: 40px;
+    flex-shrink: 0;
+}
+
+.chat-msg-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Presence Dot (Bottom Right of Avatar) */
+.presence-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid var(--card-bg); /* Match background to carve out corner */
+    background-color: #9ca3af; /* Default Grey (Offline) */
+    transition: background-color 0.3s ease;
+}
+
+.presence-dot.online {
+    background-color: #22c55e; /* Green (Online) */
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+.chat-msg-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-msg-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.chat-msg-author {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.chat-msg-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.chat-msg-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    opacity: 0.9;
+}
+
+/* Scrollbar styling for chat */
+.chat-messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.chat-messages-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+.chat-messages-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

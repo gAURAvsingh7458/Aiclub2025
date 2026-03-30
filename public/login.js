@@ -104,7 +104,11 @@ async function handleCredentialResponse(response) {
         const data = await res.json();
         if(res.ok) {
             localStorage.setItem('pathpilot_userId', data.id);
-            window.location.href = '/';
+            if (data.requiresOnboarding) {
+                window.location.href = '/onboard.html';
+            } else {
+                window.location.href = '/';
+            }
         } else {
             alert('Google Auth Failed: ' + data.error);
         }

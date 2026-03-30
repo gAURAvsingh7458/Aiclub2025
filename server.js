@@ -28,20 +28,28 @@ cron.schedule('0 0 * * *', () => {
     fetchMarketTrends();
 });
 
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
+const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-key',
     resave: false,
     saveUninitialized: false,
-    // Note: Use a SQLite store for sessions in production to survive restarts
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
-}));
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }
+});
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(sessionMiddleware);
+io.engine.use(sessionMiddleware);
 
 // --- API Endpoints ---
 
@@ -54,10 +62,22 @@ app.get('/api/auth/client-id', (req, res) => {
 // Check current user session
 app.get('/api/auth/me', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
-    const sql = `SELECT id, name, username, email, picture, tier, year, goal, focus FROM users WHERE id = ?`;
+    const sql = `SELECT id, name, username, email, picture, bio, is_online, tier, year, goal, focus FROM users WHERE id = ?`;
     db.get(sql, [req.session.userId], (err, row) => {
         if (err || !row) return res.status(401).json({ error: 'Not authenticated' });
+        row.requiresOnboarding = row.bio === null; 
         res.json(row);
+    });
+});
+
+// Complete Profile Onboarding
+app.post('/api/auth/onboard', (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { username, bio, year, focus } = req.body;
+    db.run(`UPDATE users SET username = ?, bio = ?, year = ?, focus = ? WHERE id = ?`, 
+        [username, bio, year, focus, req.session.userId], function(err) {
+        if (err) return res.status(400).json({ error: 'Username may already be taken' });
+        res.json({ success: true });
     });
 });
 
@@ -133,7 +153,7 @@ app.post('/api/auth/google', async (req, res) => {
                 db.run(sql, [name, generatedUsername, email, picture, googleId, joinedAt], function(err) {
                     if (err) return res.status(500).json({ error: 'Signup failed', details: err.message });
                     req.session.userId = this.lastID;
-                    res.json({ id: this.lastID, name, username: generatedUsername, picture });
+                    res.json({ id: this.lastID, name, username: generatedUsername, picture, requiresOnboarding: true });
                 });
             }
         });
@@ -311,7 +331,44 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ====== SOCKET.IO ENGINE ======
+io.on('connection', (socket) => {
+    const req = socket.request;
+    if (!req.session.userId) {
+        socket.disconnect();
+        return;
+    }
+    
+    // Set user as online
+    db.run(`UPDATE users SET is_online = 1 WHERE id = ?`, [req.session.userId], (err) => {
+        if (!err) io.emit('presence_update', { userId: req.session.userId, is_online: 1 });
+    });
+
+    socket.on('disconnect', () => {
+        db.run(`UPDATE users SET is_online = 0 WHERE id = ?`, [req.session.userId], (err) => {
+            if (!err) io.emit('presence_update', { userId: req.session.userId, is_online: 0 });
+        });
+    });
+
+    socket.on('send_message', async (data) => {
+        db.get(`SELECT id, username, name, picture FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
+            if (!err && user) {
+                const messagePayload = {
+                    id: Date.now().toString(),
+                    senderId: user.id,
+                    username: user.username,
+                    name: user.name,
+                    picture: user.picture,
+                    text: data.text,
+                    timestamp: new Date().toISOString()
+                };
+                io.emit('receive_message', messagePayload);
+            }
+        });
+    });
+});
+
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });

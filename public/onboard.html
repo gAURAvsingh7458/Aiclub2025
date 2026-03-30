@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - PathPilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-wrapper">
+        <div class="auth-bg-blobs">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Set Up Your Profile</h2>
+                <p>Choose a unique username and write a short bio to join the community chat!</p>
+            </div>
+
+            <form id="onboardForm">
+                <div class="form-group">
+                    <label>Unique Username</label>
+                    <input type="text" id="obUsername" placeholder="e.g. CodeNinja99" required>
+                </div>
+                <div class="form-group">
+                    <label>Bio (Short intro)</label>
+                    <input type="text" id="obBio" placeholder="CS Student @ University..." required>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Grad Year</label>
+                        <input type="text" id="obYear" placeholder="2026">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Primary Focus</label>
+                        <input type="text" id="obFocus" placeholder="DSA">
+                    </div>
+                </div>
+
+                <div id="obError" class="text-danger mt-3 text-center" style="display:none;"></div>
+
+                <button type="submit" class="btn btn-glow w-100 form-btn mt-4">Complete Profile</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('onboardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('obUsername').value.trim();
+            const bio = document.getElementById('obBio').value.trim();
+            const year = document.getElementById('obYear').value.trim();
+            const focus = document.getElementById('obFocus').value.trim();
+
+            const res = await fetch('/api/auth/onboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, bio, year, focus })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                window.location.href = '/';
+            } else {
+                const errDiv = document.getElementById('obError');
+                errDiv.textContent = data.error || 'Failed to complete profile';
+                errDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

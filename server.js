@@ -363,13 +363,26 @@ io.on('connection', (socket) => {
     socket.on('send_message', async (data) => {
         db.get(`SELECT id, username, name, picture FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
             if (!err && user) {
+                let finalName = user.name;
+                let finalUsername = user.username;
+                let finalPicture = user.picture;
+
+                if (data.isAnonymous) {
+                    // Make it anonymous
+                    const randomNum = Math.floor(1000 + Math.random() * 9000);
+                    finalName = `Secret Student #${randomNum}`;
+                    finalUsername = `anonymous_${randomNum}`;
+                    finalPicture = null;
+                }
+
                 const messagePayload = {
                     id: Date.now().toString(),
-                    senderId: user.id,
-                    username: user.username,
-                    name: user.name,
-                    picture: user.picture,
+                    senderId: user.id, // kept for moderation but masked on frontend naturally
+                    username: finalUsername,
+                    name: finalName,
+                    picture: finalPicture,
                     text: data.text,
+                    isAnonymous: data.isAnonymous || false,
                     timestamp: new Date().toISOString()
                 };
                 io.emit('receive_message', messagePayload);

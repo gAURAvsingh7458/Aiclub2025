@@ -261,7 +261,7 @@
                     </div>
                 </header>
 
-                <div class="card card-3d animate-slide-in chat-layout discord-theme" style="animation-delay: 0.1s; height: 75vh; min-height: 500px; display: flex; flex-direction: row; padding: 0; overflow: hidden;">
+                <div id="chatLayoutContainer" class="card card-3d animate-slide-in chat-layout discord-theme" style="animation-delay: 0.1s; height: 75vh; min-height: 500px; display: flex; flex-direction: row; padding: 0; overflow: hidden;">
                     
                     <!-- Left Pane: Online Users -->
                     <div class="online-users-panel">
@@ -283,7 +283,11 @@
                         </div>
 
                         <!-- Input Area -->
-                        <div class="chat-input-area" style="padding: 1rem 1.5rem; background: rgba(0,0,0,0.1); border-top: 1px solid var(--border);">
+                        <div class="chat-input-area" style="padding: 1rem 1.5rem; background: rgba(0,0,0,0.1); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="anon-toggle-wrapper">
+                                <div class="anon-toggle" id="anonToggleSwitch"></div>
+                                <span style="display: flex; align-items: center; gap: 0.5rem; user-select: none;">Anonymous Mode <span id="anonToggleStatus" style="color: var(--text-muted); font-size: 0.75rem; font-weight: normal;">(Off)</span></span>
+                            </div>
                             <div style="display: flex; gap: 1rem; align-items: flex-end; background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border);">
                                 <textarea id="chatInput" placeholder="Message #global-lounge..." style="flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.95rem; resize: none; max-height: 120px;" rows="1"></textarea>
                                 <button id="chatSendBtn" class="btn btn-glow chat-send-btn" style="padding: 0.4rem 0.8rem; border-radius: 6px;"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>

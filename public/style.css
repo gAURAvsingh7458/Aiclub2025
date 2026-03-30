@@ -7,9 +7,9 @@
 
 :root {
     /* Backgrounds */
-    --bg-main:       #F4F7FA;
-    --sidebar-bg:    #FFFFFF;
-    --card-bg:       #FFFFFF;
+    --bg-main:       linear-gradient(135deg, #e0e7ff, #f3e8ff, #e0e7ff);
+    --sidebar-bg:    rgba(255, 255, 255, 0.7);
+    --card-bg:       rgba(255, 255, 255, 0.85);
 
     /* Text */
     --text-main:     #1E293B;
@@ -38,9 +38,9 @@
 }
 
 .dark-theme {
-    --bg-main:       #0D1216;
-    --sidebar-bg:    #161B22;
-    --card-bg:       #1E2329;
+    --bg-main:       linear-gradient(135deg, #1e1b4b, #312e81, #1e1b4b);
+    --sidebar-bg:    rgba(22, 27, 34, 0.6);
+    --card-bg:       rgba(30, 35, 41, 0.7);
 
     --text-main:     #F0F6FF;
     --text-muted:    #8B949E;
@@ -67,12 +67,13 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-main);
+    background: var(--bg-main);
     color: var(--text-main);
     line-height: 1.6;
     min-height: 100vh;
+    background-attachment: fixed;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: color 0.3s ease;
 }
 .playfair { font-family: 'Playfair Display', serif; }
 
@@ -732,9 +733,62 @@ tbody tr {
     padding: 0;
     overflow: hidden;
     position: relative;
-    border: var(--card-border);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
 }
+
+.anon-mode-active.chat-layout {
+    border-color: rgba(219, 39, 119, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(219, 39, 119, 0.15);
+    background: rgba(219, 39, 119, 0.02);
+}
+
+/* Anonymous Toggle Switch */
+.anon-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.anon-toggle {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.anon-toggle.active {
+    background: linear-gradient(135deg, #7D2AE8, #db2777);
+}
+
+.anon-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.anon-toggle.active::after {
+    transform: translateX(16px);
+}
+
 
 .chat-overlay {
     position: absolute;
@@ -1254,7 +1308,7 @@ tbody tr {
    DISCORD-STYLE CHAT LAYOUT
    ============================================= */
 .discord-theme .chat-messages-container {
-    background-color: var(--card-bg);
+    background-color: transparent;
 }
 
 .chat-message-row {
@@ -1262,11 +1316,18 @@ tbody tr {
     gap: 1rem;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeChat 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeChat {
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .chat-message-row:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .chat-msg-avatar-col {
@@ -1357,7 +1418,7 @@ tbody tr {
    ============================================= */
 .online-users-panel {
     width: 260px;
-    background: var(--card-bg);
+    background: rgba(0, 0, 0, 0.15); /* Glass variant */
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -1391,7 +1452,7 @@ tbody tr {
 }
 
 .user-list-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08); /* slightly stronger distinct hover */
 }
 
 .user-list-avatar-wrapper {
@@ -1452,6 +1513,6 @@ tbody tr {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg-main);
+    background: transparent;
     min-width: 0;
 }

@@ -747,12 +747,33 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
+    // Anonymous Mode Toggle Logic
+    let isAnonymousMode = false;
+    const anonToggleSwitch = document.getElementById('anonToggleSwitch');
+    const anonToggleStatus = document.getElementById('anonToggleStatus');
+    const chatLayoutContainer = document.getElementById('chatLayoutContainer');
+
+    if (anonToggleSwitch) {
+        anonToggleSwitch.addEventListener('click', () => {
+            isAnonymousMode = !isAnonymousMode;
+            if (isAnonymousMode) {
+                anonToggleSwitch.classList.add('active');
+                if (anonToggleStatus) anonToggleStatus.innerHTML = '<span style="color: #db2777; font-weight: 600;">(On)</span>';
+                if (chatLayoutContainer) chatLayoutContainer.classList.add('anon-mode-active');
+            } else {
+                anonToggleSwitch.classList.remove('active');
+                if (anonToggleStatus) anonToggleStatus.innerHTML = '<span>(Off)</span>';
+                if (chatLayoutContainer) chatLayoutContainer.classList.remove('anon-mode-active');
+            }
+        });
+    }
+
     function handleSendChatMessage() {
         if (!chatInput || !socket) return;
         const text = chatInput.value.trim();
         if (!text || !currentUserId) return;
         
-        socket.emit('send_message', { text });
+        socket.emit('send_message', { text, isAnonymous: isAnonymousMode });
         chatInput.value = '';
     }
 

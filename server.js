@@ -369,9 +369,8 @@ io.on('connection', (socket) => {
 
                 if (data.isAnonymous) {
                     // Make it anonymous
-                    const randomNum = Math.floor(1000 + Math.random() * 9000);
-                    finalName = `Secret Student #${randomNum}`;
-                    finalUsername = `anonymous_${randomNum}`;
+                    finalName = 'Anonymous';
+                    finalUsername = 'Anonymous';
                     finalPicture = null;
                 }
 

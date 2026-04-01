@@ -248,6 +248,23 @@
         </div>
     </div>
 
+    <!-- Community Chat -->
+    <div class="section">
+        <div class="section-title">Global Lounge</div>
+        <div class="decision-card" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 12px; padding: 1.5rem;">
+            <div id="chatMessages" style="height: 250px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid #2d2d2d; border-radius: 8px; padding: 1rem; background: #0a0a0a;">
+                <!-- Messages populate here -->
+            </div>
+            <form id="chatForm" style="display: flex; gap: 1rem; align-items: center;">
+                <input type="text" id="chatInput" placeholder="Join the discussion..." style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid #2d2d2d; background: #141414; color: #fff; outline: none;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; color: #ddd;">
+                    <input type="checkbox" id="isAnonymous" style="cursor: pointer;"> Anonymous Mode
+                </label>
+                <button type="submit" class="btn-log" style="white-space: nowrap;">Send</button>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -460,6 +477,54 @@
     
 // Call initDashboard on load
 initDashboard();
+
+// ====== SOCKET CHAT INTEGRATION ======
+const socket = window.io ? io() : null;
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const isAnonymousToggle = document.getElementById('isAnonymous');
+
+if (chatForm && socket) {
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (text) {
+            socket.emit('send_message', { 
+                text: text, 
+                isAnonymous: isAnonymousToggle ? isAnonymousToggle.checked : false 
+            });
+            chatInput.value = '';
+        }
+    });
+
+    socket.on('receive_message', (msg) => {
+        const chatMsgs = document.getElementById('chatMessages');
+        if (chatMsgs) {
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const initials = msg.name ? msg.name.substring(0, 2).toUpperCase() : 'ST';
+            const nameEl = `<strong>${msg.name || msg.username || 'Student'}</strong>`;
+            const timeEl = `<span style="font-size: 0.7rem; color: #666; margin-left: 8px;">${timeStr}</span>`;
+            
+            const msgRow = document.createElement('div');
+            msgRow.style.cssText = "margin-bottom: 0.8rem; display: flex; gap: 0.75rem; font-size: 0.85rem;";
+            msgRow.innerHTML = `
+                <div style="width: 28px; height: 28px; background: #3b82f6; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; flex-shrink: 0;">
+                    ${initials}
+                </div>
+                <div>
+                    <div style="margin-bottom: 2px;">${nameEl} ${timeEl}</div>
+                    <div style="color: #ccc; line-height: 1.4;">${msg.text}</div>
+                </div>
+            `;
+            chatMsgs.appendChild(msgRow);
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }
+    });
+}
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    if (typeof io !== 'undefined' && !window.io) window.io = io;
 </script>
 </body>
 </html>
